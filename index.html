@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Votaciones Estudiantiles | Tarjetón Digital</title>
+    <!-- Google Fonts for elite display and clean body typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Ambient Glowing Spheres for futuristic background -->
+    <div class="bg-glow-sphere-1"></div>
+    <div class="bg-glow-sphere-2"></div>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="brand">
+            <div class="brand-logo">V</div>
+            <h1 class="brand-title">Votaciones <span class="brand-subtitle">Estudiantiles</span></h1>
+        </div>
+        <div class="status-badge" id="app-status">
+            <span class="status-dot simulated" id="status-dot"></span>
+            <span id="status-text">Cargando...</span>
+        </div>
+    </header>
+
+    <!-- SPA Main Container -->
+    <main>
+        
+        <!-- 1. Vista de Escaneo (Scanner View) -->
+        <section id="scan-view" class="view-section active">
+            <div class="glass-panel">
+                <div class="scan-title-container">
+                    <h2>Mesa Electoral</h2>
+                    <p>Comité Electoral: Por favor posicione y escanee el carné del estudiante para iniciar</p>
+                </div>
+                
+                <div class="scan-box">
+                    <div class="barcode-animation-wrapper">
+                        <div class="scan-laser"></div>
+                        <div class="scanner-corner corner-tl"></div>
+                        <div class="scanner-corner corner-tr"></div>
+                        <div class="scanner-corner corner-bl"></div>
+                        <div class="scanner-corner corner-br"></div>
+                        <!-- Barcode SVG Icon -->
+                        <svg viewBox="0 0 24 24">
+                            <path d="M3 4h2v16H3V4zm4 0h1v16H7V4zm3 0h3v16h-3V4zm5 0h1v16h-1V4zm3 0h3v16h-3V4z"/>
+                        </svg>
+                    </div>
+                    
+                    <form id="scan-form" class="input-container" autocomplete="off">
+                        <input 
+                            type="text" 
+                            id="carnet-input" 
+                            class="scan-input" 
+                            placeholder="Ingrese o Escanee Código" 
+                            required
+                            autofocus
+                        >
+                        <button type="submit" id="btn-verify" class="btn-verify" style="margin-top: 1.5rem;">
+                            <span>Verificar Estudiante</span>
+                            <div id="verify-spinner" class="spinner" style="display: none;"></div>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Error Banners -->
+                <div id="error-banner" class="error-banner">
+                    <!-- Warning SVG Icon -->
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                    <span id="error-message">ID de estudiante no válido o no registrado en la base de datos.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Vista de Tarjetón Electoral (Voting Card View) -->
+        <section id="voting-view" class="view-section">
+            <div class="student-welcome">
+                <h3>¡Hola, <span id="student-name" class="accent-name">Estudiante</span>!</h3>
+                <p>Por favor selecciona el partido o candidatura de tu preferencia para emitir tu voto secreto.</p>
+            </div>
+            
+            <!-- Cards Container (Populated Dynamically) -->
+            <div class="cards-grid" id="parties-container">
+                <!-- Fallback skeleton loading -->
+                <div class="party-card">
+                    <div class="party-logo-wrapper">?</div>
+                    <div class="party-name">Cargando Opciones...</div>
+                    <div class="party-candidate">Obteniendo candidatos autorizados</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Vista de Espera / Éxito (Success View) -->
+        <section id="success-view" class="view-section">
+            <div class="glass-panel success-container">
+                <div class="success-icon-wrapper">
+                    <!-- Checkmark SVG Icon -->
+                    <svg viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                    </svg>
+                </div>
+                <h2>¡Voto Registrado con Éxito!</h2>
+                <p>Tu voto secreto ha sido contabilizado. Agradecemos tu participación democrática.</p>
+                
+                <!-- Countdown Visual Progress -->
+                <div class="timer-container">
+                    <div id="success-timer-bar" class="timer-bar"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Ultra-Sleek Custom Confirmation Modal -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <!-- Vote Box/Check Icon -->
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+            </div>
+            <h4>¿Confirmar tu voto secreto?</h4>
+            <p>Una vez emitido el voto, tu registro estudiantil se marcará como participante y no podrás volver a votar.</p>
+            
+            <div class="modal-selection-badge">
+                <span id="modal-party-name">Nombre del Partido</span>
+                <span id="modal-candidate-name" class="modal-selection-candidate">Nombre del Candidato</span>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-modal btn-modal-cancel" id="btn-modal-cancel">Corregir</button>
+                <button type="button" class="btn-modal btn-modal-confirm" id="btn-modal-confirm">Confirmar Voto</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Information -->
+    <footer>
+        <p>Voto Encriptado, Anónimo y Seguro • Mesa de Votación Escolar Autorizada</p>
+    </footer>
+
+    <!-- App JavaScript Logic (Modular CDN load supported) -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
