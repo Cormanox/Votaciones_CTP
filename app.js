@@ -226,6 +226,9 @@ if (scanForm) {
             };
 
             playSuccessSound();
+            setTimeout(() => {
+                speakStudentName(estudianteActual.nombre);
+            }, 1000);
 
             if (studentNameLabel) studentNameLabel.textContent = estudianteActual.nombre;
             
@@ -576,8 +579,18 @@ function delay(ms) {
 }
 
 // =========================================================================
-// SINTETIZADOR DE SONIDOS (Web Audio API - Timbres Físicos Reales)
+// SINTETIZADOR DE SONIDOS Y VOZ (Web Audio & Speech API)
 // =========================================================================
+function speakStudentName(nombre) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(nombre);
+        utterance.lang = 'es-ES';
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+    }
+}
+
 function playSuccessSound() {
     try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
