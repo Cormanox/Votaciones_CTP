@@ -120,27 +120,39 @@
 
     </main>
 
-    <!-- Ultra-Sleek Custom Confirmation Modal -->
+    <!-- Ultra-Sleek Custom Confirmation Modal (Papeleta de Referéndum) -->
     <div class="modal-overlay" id="confirm-modal">
-        <div class="modal-content">
-            <div class="modal-icon">
-                <!-- Vote Box/Check Icon -->
-                <svg viewBox="0 0 24 24">
-                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-            </div>
-            <h4>¿Confirmar tu voto secreto?</h4>
-            <p>Una vez emitido el voto, tu registro estudiantil se marcará como participante y no podrás volver a votar.</p>
+        <div class="modal-content ballot-content">
+            <h4 id="modal-ballot-title">¿Confirmar tu voto secreto?</h4>
+            <p id="modal-ballot-description">Por favor presione una de las opciones para registrar su voto.</p>
             
-            <div class="modal-selection-badge">
-                <span id="modal-party-name">Nombre del Partido</span>
-                <span id="modal-candidate-name" class="modal-selection-candidate">Nombre del Candidato</span>
+            <!-- Papeleta Física Digital -->
+            <div class="ballot-paper">
+                <!-- Bandera del Partido -->
+                <div class="ballot-flag-wrapper" id="modal-ballot-flag-wrapper">
+                    <img id="modal-ballot-flag" src="" alt="Bandera del Partido" class="ballot-flag-img">
+                </div>
+                
+                <!-- Foto del Candidato -->
+                <div class="ballot-photo-wrapper" id="modal-ballot-photo-wrapper">
+                    <img id="modal-ballot-photo" src="" alt="Foto de Candidato" class="ballot-photo-img">
+                </div>
+                
+                <!-- Nombre del Partido -->
+                <h3 class="ballot-party-name" id="modal-ballot-party-name">Nombre del Partido</h3>
+                
+                <!-- Lista de Cargos (Generada Dinámicamente) -->
+                <div class="ballot-committee" id="modal-ballot-committee"></div>
             </div>
 
-            <div class="modal-actions">
-                <button type="button" class="btn-modal btn-modal-cancel" id="btn-modal-cancel">Corregir</button>
-                <button type="button" class="btn-modal btn-modal-confirm" id="btn-modal-confirm">Confirmar Voto</button>
+            <!-- Botones de Voto SI y Voto NO -->
+            <div class="ballot-actions">
+                <button type="button" class="btn-ballot btn-ballot-si" id="btn-modal-si">SI</button>
+                <button type="button" class="btn-ballot btn-ballot-no" id="btn-modal-no">NO</button>
             </div>
+            
+            <!-- Botón Volver -->
+            <button type="button" class="btn-ballot-back" id="btn-modal-back">Volver a la selección</button>
         </div>
     </div>
 

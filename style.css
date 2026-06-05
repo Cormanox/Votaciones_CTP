@@ -1150,3 +1150,184 @@ footer {
         padding: 2rem;
     }
 }
+
+/* =========================================================================
+   PAPELETA DE REFERÉNDUM (CONFIRMACIÓN DE VOTO)
+   ========================================================================= */
+
+.ballot-content {
+    max-width: 480px;
+    width: 95%;
+    padding: 2.25rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 2rem;
+}
+
+.ballot-paper {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.15rem;
+}
+
+/* Bandera de la papeleta */
+.ballot-flag-wrapper {
+    width: 160px;
+    height: 85px;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.ballot-flag-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Foto del candidato */
+.ballot-photo-wrapper {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    margin-top: 0.25rem;
+}
+
+.ballot-photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ballot-party-name {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    background: linear-gradient(to bottom, #ffffff, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.15rem;
+}
+
+/* Lista de cargos del comité */
+.ballot-committee {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.ballot-member {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.ballot-role {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.ballot-name {
+    color: var(--text-primary);
+    font-weight: 500;
+    text-align: right;
+}
+
+/* Botones de acción SI y NO */
+.ballot-actions {
+    display: flex;
+    width: 100%;
+    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.btn-ballot {
+    flex: 1;
+    height: 70px;
+    border-radius: 1rem;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 900;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.02);
+    transition: var(--transition-premium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+        inset 0 1px 1px rgba(255, 255, 255, 0.05),
+        0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.btn-ballot-si {
+    border: 2px solid rgba(16, 185, 129, 0.35);
+    color: #a7f3d0;
+}
+
+.btn-ballot-si:hover {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: #10b981;
+    color: #fff;
+    box-shadow: 
+        0 0 20px rgba(16, 185, 129, 0.35),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.btn-ballot-no {
+    border: 2px solid rgba(244, 63, 94, 0.35);
+    color: #fecdd3;
+}
+
+.btn-ballot-no:hover {
+    background: rgba(244, 63, 94, 0.15);
+    border-color: #f43f5e;
+    color: #fff;
+    box-shadow: 
+        0 0 20px rgba(244, 63, 94, 0.35),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.btn-ballot:active {
+    transform: translateY(0);
+}
+
+/* Enlace Volver */
+.btn-ballot-back {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: var(--transition-quick);
+    text-decoration: underline;
+    opacity: 0.7;
+}
+
+.btn-ballot-back:hover {
+    color: var(--text-primary);
+    opacity: 1;
+}

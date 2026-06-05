@@ -116,10 +116,18 @@ const studentNameLabel = document.getElementById("student-name");
 const partiesContainer = document.getElementById("parties-container");
 
 const confirmModal = document.getElementById("confirm-modal");
-const modalPartyName = document.getElementById("modal-party-name");
-const modalCandidateName = document.getElementById("modal-candidate-name");
-const btnModalCancel = document.getElementById("btn-modal-cancel");
-const btnModalConfirm = document.getElementById("btn-modal-confirm");
+const btnModalSi = document.getElementById("btn-modal-si");
+const btnModalNo = document.getElementById("btn-modal-no");
+const btnModalBack = document.getElementById("btn-modal-back");
+
+const modalBallotTitle = document.getElementById("modal-ballot-title");
+const modalBallotDescription = document.getElementById("modal-ballot-description");
+const modalBallotFlagWrapper = document.getElementById("modal-ballot-flag-wrapper");
+const modalBallotFlag = document.getElementById("modal-ballot-flag");
+const modalBallotPhotoWrapper = document.getElementById("modal-ballot-photo-wrapper");
+const modalBallotPhoto = document.getElementById("modal-ballot-photo");
+const modalBallotPartyName = document.getElementById("modal-ballot-party-name");
+const modalBallotCommittee = document.getElementById("modal-ballot-committee");
 
 let estudianteActual = null; 
 let partidoSeleccionado = null; 
@@ -430,20 +438,142 @@ async function cargarYRenderizarPartidos() {
 // =========================================================================
 function abrirConfirmacion(partido) {
     partidoSeleccionado = partido;
-    if (modalPartyName) modalPartyName.textContent = partido.nombre_partido;
-    if (modalCandidateName) {
-        if (partido.id === "Voto_Nulo") {
-            modalCandidateName.textContent = "Anulación voluntaria del voto";
-        } else {
-            const nombreCandidato = partido.candidato || partido.candidata;
-            if (nombreCandidato && nombreCandidato !== "N/A") {
-                const labelCandidato = determinarGenero(nombreCandidato) === "femenino" ? "Candidata" : "Candidato";
-                modalCandidateName.textContent = `${labelCandidato}: ${nombreCandidato}`;
-            } else {
-                modalCandidateName.textContent = "Opción de Voto en Blanco";
+    
+    // Limpiar contenido previo de cargos
+    if (modalBallotCommittee) modalBallotCommittee.innerHTML = "";
+    
+    if (partido.id === "Voto_Nulo") {
+        // Formato para Voto Nulo
+        if (modalBallotTitle) modalBallotTitle.textContent = "¿Confirmar Voto Nulo?";
+        if (modalBallotDescription) modalBallotDescription.textContent = "Has seleccionado la anulación voluntaria del voto.";
+        
+        if (modalBallotFlagWrapper) modalBallotFlagWrapper.style.display = "none";
+        if (modalBallotPhotoWrapper) modalBallotPhotoWrapper.style.display = "none";
+        if (modalBallotPartyName) modalBallotPartyName.textContent = "Voto Nulo";
+        
+        if (modalBallotCommittee) {
+            modalBallotCommittee.innerHTML = `
+                <div class="ballot-member" style="justify-content: center;">
+                    <span class="ballot-role" style="text-align: center;">Anulación voluntaria del voto secreto</span>
+                </div>
+            `;
+        }
+        
+        // En Voto Nulo, SI confirma el nulo, y NO actúa como Volver
+        if (btnModalSi) btnModalSi.textContent = "SI";
+        if (btnModalNo) btnModalNo.textContent = "NO (Volver)";
+        if (btnModalBack) btnModalBack.style.display = "none"; // Ya el NO sirve para volver
+        
+    } else {
+        // Formato para partidos políticos reales
+        if (modalBallotTitle) modalBallotTitle.textContent = "¿Confirmar tu voto secreto?";
+        if (modalBallotDescription) modalBallotDescription.textContent = "Selecciona SI para votar a favor, o NO para votar en contra.";
+        
+        // Renderizar Bandera
+        let banderaUrl = partido.foto_bandera || partido.bandera;
+        if (banderaUrl && typeof banderaUrl === "string") {
+            banderaUrl = banderaUrl.trim();
+            if (banderaUrl.startsWith("/")) {
+                banderaUrl = banderaUrl.substring(1);
             }
         }
+        
+        // Fallbacks de banderas
+        const esPixar = partido.id === "partido-1" || (partido.nombre_partido && partido.nombre_partido.toLowerCase() === "pixar");
+        const esTrono = partido.id === "partido-2" || (partido.nombre_partido && partido.nombre_partido.toLowerCase() === "trono");
+        
+        if (!banderaUrl && esPixar) banderaUrl = "imgs/pixar/Bandera_pixar.webp";
+        if (!banderaUrl && esTrono) banderaUrl = "imgs/trono/bandera_trono.webp";
+        
+        if (banderaUrl) {
+            if (modalBallotFlag) modalBallotFlag.src = banderaUrl;
+            if (modalBallotFlagWrapper) modalBallotFlagWrapper.style.display = "block";
+        } else {
+            if (modalBallotFlagWrapper) modalBallotFlagWrapper.style.display = "none";
+        }
+        
+        // Renderizar Foto de Candidato
+        let fotoUrl = partido.foto_candidato || partido.foto_candidata;
+        if (fotoUrl && typeof fotoUrl === "string") {
+            fotoUrl = fotoUrl.trim();
+            if (fotoUrl.startsWith("/")) {
+                fotoUrl = fotoUrl.substring(1);
+            }
+            if (fotoUrl === "imgs/candidato_1.webp") fotoUrl = "imgs/pixar/candidato_1.webp";
+            if (fotoUrl === "imgs/candidato_2.webp") fotoUrl = "imgs/trono/candidato_2.webp";
+        }
+        
+        if (esPixar && (!fotoUrl || fotoUrl === "imgs/candidato_1.webp")) fotoUrl = "imgs/pixar/candidato_1.webp";
+        if (esTrono && (!fotoUrl || fotoUrl === "imgs/candidato_2.webp")) fotoUrl = "imgs/trono/candidato_2.webp";
+        
+        if (fotoUrl) {
+            if (modalBallotPhoto) modalBallotPhoto.src = fotoUrl;
+            if (modalBallotPhotoWrapper) modalBallotPhotoWrapper.style.display = "block";
+        } else {
+            if (modalBallotPhotoWrapper) modalBallotPhotoWrapper.style.display = "none";
+        }
+        
+        // Nombre del partido
+        if (modalBallotPartyName) modalBallotPartyName.textContent = partido.nombre_partido;
+        
+        // Renderizar cargos dinámicamente si existen
+        if (modalBallotCommittee) {
+            // Mapeo ordenado de cargos que queremos mostrar si existen
+            const cargosPosibles = [
+                { campo: "candidato", etiqueta: "Presidente" },
+                { campo: "candidata", etiqueta: "Presidenta" },
+                { campo: "Vicepresidente", etiqueta: "Vicepresidente" },
+                { campo: "Vicepresidenta", etiqueta: "Vicepresidenta" },
+                { campo: "Secretario", etiqueta: "Secretario" },
+                { campo: "Secretaria", etiqueta: "Secretaria" },
+                { campo: "Tesorero", etiqueta: "Tesorero" },
+                { campo: "Tesorera", etiqueta: "Tesorera" },
+                { campo: "Fiscal", etiqueta: "Fiscal" },
+                { campo: "Vocal", etiqueta: "I Vocalía" },
+                { campo: "Vocal1", etiqueta: "I Vocalía" },
+                { campo: "Vocal_1", etiqueta: "I Vocalía" },
+                { campo: "Vocal2", etiqueta: "II Vocalía" },
+                { campo: "Vocal_2", etiqueta: "II Vocalía" }
+            ];
+            
+            // Recorrer y agregar cargos que estén definidos
+            cargosPosibles.forEach(cargo => {
+                const nombreMiembro = partido[cargo.campo];
+                if (nombreMiembro && nombreMiembro !== "N/A" && typeof nombreMiembro === "string" && nombreMiembro.trim() !== "") {
+                    // Si ya se agregó esta etiqueta genérica, no repetir (ej: Presidente vs Presidenta)
+                    const cargoNormalizado = cargo.etiqueta.includes("President") ? "Presidente" : 
+                                            cargo.etiqueta.includes("Vicepresid") ? "Vicepresidente" :
+                                            cargo.etiqueta.includes("Secretar") ? "Secretario" :
+                                            cargo.etiqueta.includes("Tesor") ? "Tesorero" : cargo.etiqueta;
+
+                    const selectorPrevio = modalBallotCommittee.querySelector(`[data-cargo="${cargoNormalizado}"]`);
+                    if (!selectorPrevio) {
+                        const row = document.createElement("div");
+                        row.className = "ballot-member";
+                        row.setAttribute("data-cargo", cargoNormalizado);
+                        
+                        const roleSpan = document.createElement("span");
+                        roleSpan.className = "ballot-role";
+                        roleSpan.textContent = cargo.etiqueta;
+                        
+                        const nameSpan = document.createElement("span");
+                        nameSpan.className = "ballot-name";
+                        nameSpan.textContent = nombreMiembro.trim();
+                        
+                        row.appendChild(roleSpan);
+                        row.appendChild(nameSpan);
+                        modalBallotCommittee.appendChild(row);
+                    }
+                }
+            });
+        }
+        
+        // En partido político normal: SI vota SI, NO vota NO
+        if (btnModalSi) btnModalSi.textContent = "SI";
+        if (btnModalNo) btnModalNo.textContent = "NO";
+        if (btnModalBack) btnModalBack.style.display = "block"; // Permite cancelar y volver
     }
+    
     if (confirmModal) confirmModal.classList.add("active");
 }
 
@@ -452,82 +582,125 @@ function cerrarConfirmacion() {
     partidoSeleccionado = null;
 }
 
-if (btnModalCancel) btnModalCancel.addEventListener("click", cerrarConfirmacion);
+if (btnModalBack) btnModalBack.addEventListener("click", cerrarConfirmacion);
 
-// =========================================================================
-// REGISTRO DE VOTO (TRANSACCIÓN ATÓMICA DE SEGURIDAD)
-// =========================================================================
-if (btnModalConfirm) {
-    btnModalConfirm.addEventListener("click", async () => {
-        if (!estudianteActual || !partidoSeleccionado) return;
+// Click handlers para los botones de la papeleta
+if (btnModalSi) {
+    btnModalSi.addEventListener("click", () => {
+        ejecutarTransaccionVoto("SI");
+    });
+}
 
-        btnModalConfirm.disabled = true;
-        btnModalCancel.disabled = true;
-        btnModalConfirm.textContent = "Procesando...";
-
-        try {
-            if (USAR_DEMO) {
-                await delay(1000);
-                const estudiante = mockEstudiantes[estudianteActual.id];
-                
-                if (estudiante.ya_voto) {
-                    throw new Error("El estudiante ya ha votado previamente.");
-                }
-
-                estudiante.ya_voto = true;
-                const partidoRef = mockPartidos.find(p => p.id === partidoSeleccionado.id);
-                if (partidoRef) {
-                    partidoRef.votos_acumulados += 1;
-                }
-            } else {
-                // TRANSACCIÓN ATÓMICA FIRESTORE (Evita fraudes y asegura concurrencia perfecta)
-                const estudianteDocRef = doc(db, "estudiantes", estudianteActual.id);
-                const partidoDocRef = doc(db, "partidos", partidoSeleccionado.id);
-
-                await runTransaction(db, async (transaction) => {
-                    const estudianteSnap = await transaction.get(estudianteDocRef);
-                    if (!estudianteSnap.exists()) {
-                        throw new Error("El documento de estudiante no existe.");
-                    }
-                    
-                    const yaVotoEstado = estudianteSnap.data().ya_voto;
-                    if (yaVotoEstado) {
-                        throw new Error("El estudiante ya ha registrado un voto en esta jornada.");
-                    }
-
-                    const partidoSnap = await transaction.get(partidoDocRef);
-                    if (!partidoSnap.exists()) {
-                        throw new Error("El partido seleccionado no existe.");
-                    }
-
-                    const votosActuales = partidoSnap.data().votos_acumulados || 0;
-
-                    // Escritura segura simultánea
-                    transaction.update(estudianteDocRef, { ya_voto: true });
-                    transaction.update(partidoDocRef, { votos_acumulados: votosActuales + 1 });
-                });
-            }
-
+if (btnModalNo) {
+    btnModalNo.addEventListener("click", () => {
+        if (partidoSeleccionado && partidoSeleccionado.id === "Voto_Nulo") {
             cerrarConfirmacion();
-            showView(successView);
-
-            setTimeout(() => {
-                resetCicloElectoral();
-            }, 3000);
-
-        } catch (err) {
-            console.error("Error crítico en transacción de voto:", err);
-            alert(`Error al procesar el voto: ${err.message || err}. El tarjetón se reiniciará por seguridad.`);
-            cerrarConfirmacion();
-            resetCicloElectoral();
-        } finally {
-            if (btnModalConfirm) {
-                btnModalConfirm.disabled = false;
-                btnModalConfirm.textContent = "Confirmar Voto";
-            }
-            if (btnModalCancel) btnModalCancel.disabled = false;
+        } else {
+            ejecutarTransaccionVoto("NO");
         }
     });
+}
+
+async function ejecutarTransaccionVoto(opcionVotada) {
+    if (!estudianteActual || !partidoSeleccionado) return;
+
+    if (btnModalSi) btnModalSi.disabled = true;
+    if (btnModalNo) btnModalNo.disabled = true;
+    if (btnModalBack) btnModalBack.disabled = true;
+    
+    const originalTextSi = btnModalSi ? btnModalSi.textContent : "SI";
+    const originalTextNo = btnModalNo ? btnModalNo.textContent : "NO";
+    
+    if (opcionVotada === "SI" && btnModalSi) {
+        btnModalSi.textContent = "Procesando...";
+    } else if (opcionVotada === "NO" && btnModalNo) {
+        btnModalNo.textContent = "Procesando...";
+    }
+
+    try {
+        if (USAR_DEMO) {
+            await delay(1000);
+            const estudiante = mockEstudiantes[estudianteActual.id];
+            
+            if (estudiante.ya_voto) {
+                throw new Error("El estudiante ya ha votado previamente.");
+            }
+
+            estudiante.ya_voto = true;
+            const partidoRef = mockPartidos.find(p => p.id === partidoSeleccionado.id);
+            if (partidoRef) {
+                if (partidoSeleccionado.id === "Voto_Nulo") {
+                    partidoRef.votos_acumulados += 1;
+                } else {
+                    if (opcionVotada === "SI") {
+                        partidoRef.votos_acumulados += 1;
+                    } else if (opcionVotada === "NO") {
+                        partidoRef.votos_no = (partidoRef.votos_no || 0) + 1;
+                    }
+                }
+            }
+        } else {
+            // TRANSACCIÓN ATÓMICA FIRESTORE (Evita fraudes y asegura concurrencia perfecta)
+            const estudianteDocRef = doc(db, "estudiantes", estudianteActual.id);
+            const partidoDocRef = doc(db, "partidos", partidoSeleccionado.id);
+
+            await runTransaction(db, async (transaction) => {
+                const estudianteSnap = await transaction.get(estudianteDocRef);
+                if (!estudianteSnap.exists()) {
+                    throw new Error("El documento de estudiante no existe.");
+                }
+                
+                const yaVotoEstado = estudianteSnap.data().ya_voto;
+                if (yaVotoEstado) {
+                    throw new Error("El estudiante ya ha registrado un voto en esta jornada.");
+                }
+
+                const partidoSnap = await transaction.get(partidoDocRef);
+                if (!partidoSnap.exists()) {
+                    throw new Error("El partido seleccionado no existe.");
+                }
+
+                if (partidoSeleccionado.id === "Voto_Nulo") {
+                    const votosActuales = partidoSnap.data().votos_acumulados || 0;
+                    transaction.update(partidoDocRef, { votos_acumulados: votosActuales + 1 });
+                } else {
+                    if (opcionVotada === "SI") {
+                        const votosActuales = partidoSnap.data().votos_acumulados || 0;
+                        transaction.update(partidoDocRef, { votos_acumulados: votosActuales + 1 });
+                    } else if (opcionVotada === "NO") {
+                        const votosNoActuales = partidoSnap.data().votos_no || 0;
+                        transaction.update(partidoDocRef, { votos_no: votosNoActuales + 1 });
+                    }
+                }
+
+                // Escritura segura simultánea
+                transaction.update(estudianteDocRef, { ya_voto: true });
+            });
+        }
+
+        cerrarConfirmacion();
+        showView(successView);
+
+        setTimeout(() => {
+            resetCicloElectoral();
+        }, 3000);
+
+    } catch (err) {
+        console.error("Error crítico en transacción de voto:", err);
+        alert(`Error al procesar el voto: ${err.message || err}. El tarjetón se reiniciará por seguridad.`);
+        cerrarConfirmacion();
+        resetCicloElectoral();
+    } finally {
+        if (btnModalSi) {
+            btnModalSi.disabled = false;
+            btnModalSi.textContent = originalTextSi;
+        }
+        if (btnModalNo) {
+            btnModalNo.disabled = false;
+            btnModalNo.textContent = originalTextNo;
+        }
+        if (btnModalBack) btnModalBack.disabled = false;
+    }
 }
 
 // =========================================================================
