@@ -87,11 +87,12 @@ function actualizarEstadoConexion(online, msg = "") {
 // DATA DE SIMULACIÓN LOCAL (FALLBACK MOCK)
 // =========================================================================
 const mockEstudiantes = {
-    "20261001": { nombre: "Estudiante 1", ya_voto: true },
-    "20261002": { nombre: "Estudiante 2", ya_voto: true },
-    "20261003": { nombre: "Estudiante 3", ya_voto: false },
-    "20261004": { nombre: "Estudiante 4", ya_voto: true },
-    "20261005": { nombre: "Estudiante 5", ya_voto: false }
+    "20261001": { nombre: "Estudiante de Prueba 1", ya_voto: true, fecha_voto: "2026-06-09T08:30:15.000Z" },
+    "20261002": { nombre: "Estudiante de Prueba 2", ya_voto: true, fecha_voto: "2026-06-09T09:12:44.000Z" },
+    "20261003": { nombre: "Estudiante de Prueba 3", ya_voto: false },
+    "20261004": { nombre: "Estudiante de Prueba 4", ya_voto: true, fecha_voto: "2026-06-09T09:44:12.000Z" },
+    "20261005": { nombre: "Estudiante de Prueba 5", ya_voto: false },
+    "1234": { nombre: "admin", ya_voto: false }
 };
 
 const mockPartidos = [
@@ -136,12 +137,25 @@ async function cargarResultados() {
         let votosEmitidos = 0;
         let partidosList = [];
 
+        let votedStudentsList = [];
+
         if (USAR_DEMO) {
             await delay(500); // Pequeña simulación de retardo
             // Carga de padrón y participación
             const estudiantesArr = Object.values(mockEstudiantes);
             totalPadron = estudiantesArr.length;
-            votosEmitidos = estudiantesArr.filter(e => e.ya_voto).length;
+            
+            Object.keys(mockEstudiantes).forEach(id => {
+                const e = mockEstudiantes[id];
+                if (e.ya_voto) {
+                    votedStudentsList.push({
+                        id: id,
+                        nombre: e.nombre,
+                        fecha_voto: e.fecha_voto
+                    });
+                }
+            });
+            votosEmitidos = votedStudentsList.length;
             
             // Clonamos los partidos del mock para evitar mutaciones directas
             partidosList = mockPartidos.map(p => ({ ...p }));
@@ -153,10 +167,19 @@ async function cargarResultados() {
             const padronSnap = await getCountFromServer(padronCollRef);
             totalPadron = padronSnap.data().count;
 
-            // 2. Obtener total que ya votó
+            // 2. Obtener lista completa de votantes con sus datos
             const votedQuery = query(collection(db, "estudiantes"), where("ya_voto", "==", true));
-            const votedSnap = await getCountFromServer(votedQuery);
-            votosEmitidos = votedSnap.data().count;
+            const votedSnap = await getDocs(votedQuery);
+            votosEmitidos = votedSnap.size;
+
+            votedSnap.forEach(docSnap => {
+                const data = docSnap.data();
+                votedStudentsList.push({
+                    id: docSnap.id,
+                    nombre: data.nombre || "Estudiante",
+                    fecha_voto: data.fecha_voto
+                });
+            });
 
             // 3. Obtener el recuento de partidos
             const querySnapshot = await getDocs(collection(db, "partidos"));
@@ -173,6 +196,13 @@ async function cargarResultados() {
             });
         }
 
+        // Ordenar estudiantes votantes cronológicamente (del más reciente al más antiguo)
+        votedStudentsList.sort((a, b) => {
+            const dateA = a.fecha_voto ? new Date(a.fecha_voto) : new Date(0);
+            const dateB = b.fecha_voto ? new Date(b.fecha_voto) : new Date(0);
+            return dateB - dateA;
+        });
+
         // Encontrar votos nulos
         const nuloItem = partidosList.find(p => p.id === "Voto_Nulo") || { votos_acumulados: 0 };
         const votosNulos = nuloItem.votos_acumulados || 0;
@@ -185,6 +215,9 @@ async function cargarResultados() {
 
         // Renderizar gráfico de dona interactivo
         renderizarGrafico(partidosList);
+
+        // Renderizar listado de auditoría de votantes
+        renderizarVotantesList(votedStudentsList);
 
     } catch (error) {
         console.error("Error al cargar escrutinio:", error);
@@ -384,6 +417,47 @@ function renderizarGrafico(partidosList) {
     });
 }
 
+function renderizarVotantesList(votedStudents) {
+    const listContainer = document.getElementById("voted-students-list");
+    const countBadge = document.getElementById("voted-count-badge");
+    if (!listContainer) return;
+
+    if (countBadge) {
+        countBadge.textContent = `${votedStudents.length} Votantes`;
+    }
+
+    listContainer.innerHTML = "";
+
+    if (votedStudents.length === 0) {
+        listContainer.innerHTML = `<div style="font-size: 0.95rem; color: var(--text-secondary); text-align: center; padding: 2rem 0;">Ningún estudiante ha registrado su voto todavía.</div>`;
+        return;
+    }
+
+    votedStudents.forEach(estudiante => {
+        const item = document.createElement("div");
+        item.className = "voted-student-item";
+
+        let horaFormat = "N/A";
+        if (estudiante.fecha_voto) {
+            try {
+                const date = new Date(estudiante.fecha_voto);
+                horaFormat = date.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            } catch (e) {
+                console.error("Error formatting date:", e);
+            }
+        }
+
+        item.innerHTML = `
+            <div style="display: flex; flex-direction: column;">
+                <span style="color: #fff; font-weight: 600;">${estudiante.nombre}</span>
+                <span style="color: var(--text-muted); font-size: 0.75rem;">Carné: ${estudiante.id}</span>
+            </div>
+            <span style="color: var(--accent-cyan); font-family: var(--font-display); font-weight: 700;">${horaFormat}</span>
+        `;
+        listContainer.appendChild(item);
+    });
+}
+
 // Determinación inteligente de género (mismo algoritmo que app.js)
 function determinarGenero(nombre) {
     if (!nombre || nombre === "N/A") return "neutral";
@@ -481,6 +555,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                     Object.keys(mockEstudiantes).forEach(key => {
                         mockEstudiantes[key].ya_voto = false;
+                        delete mockEstudiantes[key].fecha_voto;
                     });
                 } else {
                     const partidosSnap = await getDocs(collection(db, "partidos"));
@@ -494,7 +569,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     const votedSnap = await getDocs(votedQuery);
 
                     votedSnap.forEach(docSnap => {
-                        batch.update(docSnap.ref, { ya_voto: false });
+                        batch.update(docSnap.ref, { 
+                            ya_voto: false,
+                            fecha_voto: null 
+                        });
                     });
 
                     await batch.commit();

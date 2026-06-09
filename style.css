@@ -1673,4 +1673,42 @@ input:checked + .slider:before {
         0 0 15px rgba(244, 63, 94, 0.3) !important;
 }
 
+/* Estilos para la lista de estudiantes que ya votaron (Auditoría) */
+#voted-students-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+#voted-students-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.01);
+    border-radius: 4px;
+}
+
+#voted-students-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+}
+
+#voted-students-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.voted-student-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1.25rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    transition: var(--transition-quick);
+}
+
+.voted-student-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(99, 102, 241, 0.2);
+    transform: translateX(2px);
+}
+
+
 

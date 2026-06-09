@@ -63,7 +63,8 @@ if (!USAR_DEMO) {
 // =========================================================================
 const mockEstudiantes = {
     "20261001": { nombre: "Estudiante de Prueba 1", ya_voto: false },
-    "20261002": { nombre: "Estudiante de Prueba 2", ya_voto: true }
+    "20261002": { nombre: "Estudiante de Prueba 2", ya_voto: true },
+    "1234": { nombre: "admin", ya_voto: false }
 };
 
 const mockPartidos = [
@@ -628,6 +629,7 @@ async function ejecutarTransaccionVoto() {
             }
 
             estudiante.ya_voto = true;
+            estudiante.fecha_voto = new Date().toISOString();
             const partidoRef = mockPartidos.find(p => p.id === partidoSeleccionado.id);
             if (partidoRef) {
                 partidoRef.votos_acumulados += 1;
@@ -657,7 +659,10 @@ async function ejecutarTransaccionVoto() {
                 transaction.update(partidoDocRef, { votos_acumulados: votosActuales + 1 });
 
                 // Escritura segura simultánea
-                transaction.update(estudianteDocRef, { ya_voto: true });
+                transaction.update(estudianteDocRef, { 
+                     ya_voto: true,
+                     fecha_voto: new Date().toISOString()
+                });
             });
         }
 
