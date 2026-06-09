@@ -189,6 +189,15 @@ if (scanForm) {
         const carnetId = carnetInput.value.trim();
         if (!carnetId) return;
 
+        // Redirección especial para el administrador electoral
+        if (carnetId === "1234") {
+            playSuccessSound();
+            setTimeout(() => {
+                window.location.href = "resultados.html";
+            }, 500);
+            return;
+        }
+
         setLoadingState(true);
 
         try {
@@ -461,13 +470,13 @@ function abrirConfirmacion(partido) {
         
         // En Voto Nulo, SI confirma el nulo, y NO actúa como Volver
         if (btnModalSi) btnModalSi.textContent = "SI";
-        if (btnModalNo) btnModalNo.textContent = "NO (Volver)";
-        if (btnModalBack) btnModalBack.style.display = "none"; // Ya el NO sirve para volver
+        if (btnModalNo) btnModalNo.textContent = "Volver";
+        if (btnModalBack) btnModalBack.style.display = "none"; // Ya el botón Volver sirve directamente
         
     } else {
         // Formato para partidos políticos reales
         if (modalBallotTitle) modalBallotTitle.textContent = "¿Confirmar tu voto secreto?";
-        if (modalBallotDescription) modalBallotDescription.textContent = "Selecciona SI para votar a favor, o NO para votar en contra.";
+        if (modalBallotDescription) modalBallotDescription.textContent = "Selecciona SI para registrar tu voto, o Volver para cambiar de opción.";
         
         // Renderizar Bandera
         let banderaUrl = partido.foto_bandera || partido.bandera;
@@ -568,10 +577,10 @@ function abrirConfirmacion(partido) {
             });
         }
         
-        // En partido político normal: SI vota SI, NO vota NO
+        // En partido político normal: SI confirma el voto, NO/Volver cierra el modal
         if (btnModalSi) btnModalSi.textContent = "SI";
-        if (btnModalNo) btnModalNo.textContent = "NO";
-        if (btnModalBack) btnModalBack.style.display = "block"; // Permite cancelar y volver
+        if (btnModalNo) btnModalNo.textContent = "Volver";
+        if (btnModalBack) btnModalBack.style.display = "none"; // Ya el botón Volver sirve directamente
     }
     
     if (confirmModal) confirmModal.classList.add("active");
@@ -587,21 +596,15 @@ if (btnModalBack) btnModalBack.addEventListener("click", cerrarConfirmacion);
 // Click handlers para los botones de la papeleta
 if (btnModalSi) {
     btnModalSi.addEventListener("click", () => {
-        ejecutarTransaccionVoto("SI");
+        ejecutarTransaccionVoto();
     });
 }
 
 if (btnModalNo) {
-    btnModalNo.addEventListener("click", () => {
-        if (partidoSeleccionado && partidoSeleccionado.id === "Voto_Nulo") {
-            cerrarConfirmacion();
-        } else {
-            ejecutarTransaccionVoto("NO");
-        }
-    });
+    btnModalNo.addEventListener("click", cerrarConfirmacion);
 }
 
-async function ejecutarTransaccionVoto(opcionVotada) {
+async function ejecutarTransaccionVoto() {
     if (!estudianteActual || !partidoSeleccionado) return;
 
     if (btnModalSi) btnModalSi.disabled = true;
@@ -609,12 +612,10 @@ async function ejecutarTransaccionVoto(opcionVotada) {
     if (btnModalBack) btnModalBack.disabled = true;
     
     const originalTextSi = btnModalSi ? btnModalSi.textContent : "SI";
-    const originalTextNo = btnModalNo ? btnModalNo.textContent : "NO";
+    const originalTextNo = btnModalNo ? btnModalNo.textContent : "Volver";
     
-    if (opcionVotada === "SI" && btnModalSi) {
+    if (btnModalSi) {
         btnModalSi.textContent = "Procesando...";
-    } else if (opcionVotada === "NO" && btnModalNo) {
-        btnModalNo.textContent = "Procesando...";
     }
 
     try {
@@ -629,15 +630,7 @@ async function ejecutarTransaccionVoto(opcionVotada) {
             estudiante.ya_voto = true;
             const partidoRef = mockPartidos.find(p => p.id === partidoSeleccionado.id);
             if (partidoRef) {
-                if (partidoSeleccionado.id === "Voto_Nulo") {
-                    partidoRef.votos_acumulados += 1;
-                } else {
-                    if (opcionVotada === "SI") {
-                        partidoRef.votos_acumulados += 1;
-                    } else if (opcionVotada === "NO") {
-                        partidoRef.votos_no = (partidoRef.votos_no || 0) + 1;
-                    }
-                }
+                partidoRef.votos_acumulados += 1;
             }
         } else {
             // TRANSACCIÓN ATÓMICA FIRESTORE (Evita fraudes y asegura concurrencia perfecta)
@@ -660,18 +653,8 @@ async function ejecutarTransaccionVoto(opcionVotada) {
                     throw new Error("El partido seleccionado no existe.");
                 }
 
-                if (partidoSeleccionado.id === "Voto_Nulo") {
-                    const votosActuales = partidoSnap.data().votos_acumulados || 0;
-                    transaction.update(partidoDocRef, { votos_acumulados: votosActuales + 1 });
-                } else {
-                    if (opcionVotada === "SI") {
-                        const votosActuales = partidoSnap.data().votos_acumulados || 0;
-                        transaction.update(partidoDocRef, { votos_acumulados: votosActuales + 1 });
-                    } else if (opcionVotada === "NO") {
-                        const votosNoActuales = partidoSnap.data().votos_no || 0;
-                        transaction.update(partidoDocRef, { votos_no: votosNoActuales + 1 });
-                    }
-                }
+                const votosActuales = partidoSnap.data().votos_acumulados || 0;
+                transaction.update(partidoDocRef, { votos_acumulados: votosActuales + 1 });
 
                 // Escritura segura simultánea
                 transaction.update(estudianteDocRef, { ya_voto: true });
