@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultados de Escrutinio | Votaciones Estudiantiles</title>
+    <title>Estudiantes Pendientes | Votaciones Estudiantiles</title>
     <!-- Google Fonts for elite display and clean body typography -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <!-- Chart.js library for advanced charts visualization -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -35,10 +33,10 @@
     <!-- Main Container -->
     <main>
         
-        <section id="results-view" class="view-section active" style="display: flex; flex-direction: column; width: 100%;">
+        <section id="non-voters-view" class="view-section active" style="display: flex; flex-direction: column; width: 100%;">
             <div class="student-welcome" style="margin-bottom: 2rem;">
-                <h3>Resultados de <span class="accent-name">Escrutinio</span></h3>
-                <p>Estadísticas y recuento oficial de votos de la jornada electoral actual.</p>
+                <h3>Estudiantes <span class="accent-name">Pendientes de Votar</span></h3>
+                <p>Listado y búsqueda en tiempo real de alumnos que aún no han ejercido su derecho al voto.</p>
             </div>
             
             <div class="results-layout">
@@ -50,49 +48,36 @@
                         <div class="kpi-subtext">Estudiantes registrados</div>
                     </div>
                     
+                    <div class="kpi-card kpi-card-nulls" id="kpi-card-pending" style="border-color: rgba(244, 63, 94, 0.25);">
+                        <div class="kpi-title">Pendientes de Votar</div>
+                        <div class="kpi-value" id="val-total-pending" style="background: var(--error-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0</div>
+                        <div class="kpi-subtext">Aún no han votado</div>
+                    </div>
+
                     <div class="kpi-card kpi-card-participation" id="kpi-card-participation">
-                        <div class="kpi-title">Votantes (Participación)</div>
+                        <div class="kpi-title">Participación Actual</div>
                         <div class="kpi-value" id="val-total-voters">0</div>
                         <div class="kpi-subtext" id="lbl-participation-percent">0% de participación</div>
                     </div>
-                    
-                    <div class="kpi-card kpi-card-nulls" id="kpi-card-nulls">
-                        <div class="kpi-title">Votos Nulos</div>
-                        <div class="kpi-value" id="val-total-nulls">0</div>
-                        <div class="kpi-subtext" id="lbl-nulls-percent">0% del total de votos</div>
-                    </div>
                 </div>
 
-                <!-- Gráfico de Dona -->
-                <div class="kpi-card" id="kpi-card-chart" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.25rem; width: 100%; margin-top: 1.5rem;">
-                    <div class="kpi-title" style="margin-bottom: 1.5rem;">Distribución de Votos</div>
-                    <div style="position: relative; width: 100%; max-width: 280px; height: 280px; display: flex; align-items: center; justify-content: center;">
-                        <canvas id="chart-canvas"></canvas>
-                    </div>
-                </div>
-
-                <!-- Auditoría: Estudiantes que ya Votaron -->
-                <div class="kpi-card" id="voted-students-card" style="grid-column: span 3; text-align: left; max-height: 420px; display: flex; flex-direction: column; margin-top: 1.5rem; padding: 2rem;">
+                <!-- Búsqueda y Listado de Pendientes -->
+                <div class="kpi-card" id="pending-students-card" style="text-align: left; display: flex; flex-direction: column; margin-top: 1.5rem; padding: 2rem;">
                     <div class="kpi-title" style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
-                        <span>Registro de Participación (Auditoría)</span>
-                        <span id="voted-count-badge" style="font-size: 0.8rem; background: rgba(99, 102, 241, 0.15); color: #c084fc; padding: 0.25rem 0.75rem; border-radius: 1rem; font-weight: 700;">0 Votantes</span>
+                        <span>Listado de Alumnos Pendientes</span>
+                        <span id="pending-count-badge" style="font-size: 0.8rem; background: rgba(244, 63, 94, 0.15); color: #fda4af; padding: 0.25rem 0.75rem; border-radius: 1rem; font-weight: 700;">0 Pendientes</span>
                     </div>
-                    <div id="voted-students-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; padding-right: 0.5rem;">
-                        <div style="font-size: 0.95rem; color: var(--text-secondary); text-align: center; padding: 2rem 0;">Ningún estudiante ha registrado su voto todavía.</div>
+
+                    <!-- Barra de Búsqueda -->
+                    <div class="search-container">
+                        <input type="text" id="search-input" class="search-input" placeholder="Buscar por nombre o carné..." autocomplete="off">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        </svg>
                     </div>
-                </div>
 
-                <!-- Partidos Desglose Grid -->
-                <div class="student-welcome" style="text-align: left; margin-top: 1rem; margin-bottom: 1rem;">
-                    <h4 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 800;">Recuento de Candidaturas</h4>
-                </div>
-
-                <div class="results-parties-grid" id="results-parties-container">
-                    <!-- Dinamically populated results cards -->
-                    <div class="results-party-card">
-                        <div class="results-party-info">
-                            <p>Cargando información de candidaturas...</p>
-                        </div>
+                    <div id="pending-students-list" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; padding-right: 0.5rem;">
+                        <div style="font-size: 0.95rem; color: var(--text-secondary); text-align: center; padding: 2rem 0;">Cargando listado de estudiantes...</div>
                     </div>
                 </div>
 
@@ -102,7 +87,7 @@
                         <svg class="refresh-icon" viewBox="0 0 24 24">
                             <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
                         </svg>
-                        <span id="btn-refresh-text">Actualizar Resultados</span>
+                        <span id="btn-refresh-text">Actualizar Lista</span>
                     </button>
                     
                     <label class="auto-refresh-control" for="chk-auto-refresh">
@@ -114,20 +99,15 @@
                     </label>
                 </div>
 
-                <!-- Panel de Administración -->
-                <div class="kpi-card" id="admin-panel-card" style="text-align: left; border: 1px dashed rgba(244, 63, 94, 0.25); background: rgba(244, 63, 94, 0.02); margin-top: 2rem;">
-                    <div class="kpi-title" style="color: #fda4af;">Panel de Administración</div>
+                <!-- Panel de Navegación -->
+                <div class="kpi-card" id="admin-panel-card" style="text-align: left; border: 1px dashed rgba(14, 165, 233, 0.25); background: rgba(14, 165, 233, 0.02); margin-top: 1rem;">
+                    <div class="kpi-title" style="color: var(--accent-cyan);">Navegación Electoral</div>
                     <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5;">
-                        Controles de mantenimiento electoral. Al restablecer las elecciones, se borrarán todos los votos y se habilitarán todos los estudiantes del padrón electoral para votar nuevamente.
+                        Acceso a otras secciones de control de la mesa electoral y visualización del escrutinio en tiempo real.
                     </p>
                     <div style="display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: center;">
-                        <button type="button" class="btn-verify" id="btn-reset-election" style="background: var(--error-grad); box-shadow: 0 8px 25px rgba(244, 63, 94, 0.25); max-width: 260px; margin-top: 0; padding: 0.85rem 1.5rem; font-size: 1rem; border-radius: 0.75rem;">
-                            <span>Restablecer Elecciones</span>
-                            <div id="reset-spinner" class="spinner" style="display: none; width: 1.1rem; height: 1.1rem; border-width: 2px; border-top-color: #fff; margin-left: 0.5rem;"></div>
-                        </button>
-                        
-                        <button type="button" class="btn-refresh" id="btn-view-non-voters" style="border-color: var(--accent-cyan); color: #fff;">
-                            <span>Ver Pendientes de Voto</span>
+                        <button type="button" class="btn-verify" id="btn-back-to-results" style="background: var(--primary-grad); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.25); max-width: 260px; margin-top: 0; padding: 0.85rem 1.5rem; font-size: 1rem; border-radius: 0.75rem;">
+                            <span>Volver a Resultados</span>
                         </button>
                         
                         <button type="button" class="btn-refresh" id="btn-back-to-vote">
@@ -158,6 +138,6 @@
     </footer>
 
     <!-- App JavaScript Logic -->
-    <script type="module" src="resultados.js?v=4"></script>
+    <script type="module" src="novotaron.js?v=4"></script>
 </body>
 </html>

@@ -525,6 +525,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Ver estudiantes que no votaron
+    const btnViewNonVoters = document.getElementById("btn-view-non-voters");
+    if (btnViewNonVoters) {
+        btnViewNonVoters.addEventListener("click", () => {
+            window.location.href = "novotaron.html";
+        });
+    }
+
     // Volver al tarjetón
     const btnBackToVote = document.getElementById("btn-back-to-vote");
     if (btnBackToVote) {

@@ -1674,21 +1674,25 @@ input:checked + .slider:before {
 }
 
 /* Estilos para la lista de estudiantes que ya votaron (Auditoría) */
-#voted-students-list::-webkit-scrollbar {
+#voted-students-list::-webkit-scrollbar,
+#pending-students-list::-webkit-scrollbar {
     width: 6px;
 }
 
-#voted-students-list::-webkit-scrollbar-track {
+#voted-students-list::-webkit-scrollbar-track,
+#pending-students-list::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.01);
     border-radius: 4px;
 }
 
-#voted-students-list::-webkit-scrollbar-thumb {
+#voted-students-list::-webkit-scrollbar-thumb,
+#pending-students-list::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.08);
     border-radius: 4px;
 }
 
-#voted-students-list::-webkit-scrollbar-thumb:hover {
+#voted-students-list::-webkit-scrollbar-thumb:hover,
+#pending-students-list::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.15);
 }
 
@@ -1709,6 +1713,73 @@ input:checked + .slider:before {
     border-color: rgba(99, 102, 241, 0.2);
     transform: translateX(2px);
 }
+
+/* Estilos para la barra de búsqueda y lista de estudiantes pendientes de voto */
+.search-container {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 1.1rem 1.4rem;
+    padding-left: 3.2rem;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 1rem;
+    font-size: 1.05rem;
+    color: #fff;
+    font-family: var(--font-body);
+    outline: none;
+    transition: var(--transition-premium);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.search-container svg {
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.35rem;
+    height: 1.35rem;
+    fill: var(--text-secondary);
+    pointer-events: none;
+    transition: var(--transition-quick);
+}
+
+.search-input:focus {
+    border-color: rgba(139, 92, 246, 0.5);
+    box-shadow: 
+        0 0 0 4px rgba(139, 92, 246, 0.1),
+        0 0 25px var(--primary-glow),
+        inset 0 2px 5px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.search-input:focus + svg {
+    fill: #a855f7;
+}
+
+.pending-student-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1.25rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    transition: var(--transition-quick);
+}
+
+.pending-student-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(244, 63, 94, 0.2);
+    transform: translateX(2px);
+}
+
 
 
 
